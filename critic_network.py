@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-BUFFER_SIZE = 10
-BATCH_SIZE = 3
+BATCH_SIZE = 32
+BUFFER_SIZE = 10000
 GAMMA = 0.99
 LEARNING_RATE = 1e-3
 TAU = 1e-3
@@ -39,11 +39,10 @@ class CriticNetwork:
 		# conv1 = tf.layers.conv2d(state, 32, 8, 4, padding='same', activation=tf.nn.relu)
 		# conv2 = tf.layers.conv2d(conv1, 64, 4, 2, padding='same', activation=tf.nn.relu)
 		# flattened = tf.layers.flatten(conv2)
-		critic_nw = tf.layers.dense(self.state, 256, activation=tf.nn.relu)
-		critic_nw_actions = tf.layers.dense(self.action, 256)
-		print(tf.shape(critic_nw) , " ----------- ", tf.shape(critic_nw_actions))
-		critic_nw = tf.concat([critic_nw, critic_nw_actions], axis=1)
-		critic_output = tf.layers.dense(critic_nw, 1)
+		input_layer = tf.concat([self.state, self.action], axis=1)
+		dense1 = tf.layers.dense(input_layer, 256, activation=tf.nn.relu)
+		dense2 = tf.layers.dense(dense1, 256, activation=tf.nn.relu)
+		critic_output = tf.layers.dense(dense2, 1)
 		return critic_output
 
 	def createCriticNetworkTarget(self):
@@ -51,18 +50,18 @@ class CriticNetwork:
 		# conv1 = tf.layers.conv2d(state, 32, 8, 4, padding='same', activation=tf.nn.relu)
 		# conv2 = tf.layers.conv2d(conv1, 64, 4, 2, padding='same', activation=tf.nn.relu)
 		# flattened = tf.layers.flatten(conv2)
-		critic_nw = tf.layers.dense(self.state_, 256, activation=tf.nn.relu)
-		critic_nw_actions = tf.layers.dense(self.action_, 256)
-		critic_nw = tf.concat([critic_nw, critic_nw_actions], axis=1)
-		critic_target_output = tf.layers.dense(critic_nw, 1)
+		input_layer = tf.concat([self.state_, self.action_], axis=1)
+		dense1 = tf.layers.dense(input_layer, 256, activation=tf.nn.relu)
+		dense2 = tf.layers.dense(dense1, 256, activation=tf.nn.relu)
+		critic_target_output = tf.layers.dense(dense2, 1)
 		return critic_target_output
 
 	def trainNetwork(self):
 		q_batch = self.critic_output
 		loss = tf.reduce_mean(tf.square( \
-			self.y_batch - q_batch)) # axis???
+			self.y_batch - q_batch))
 		optimizer = \
-			tf.train.AdamOptimizer(0.01).minimize(loss) #params[learning_rate]???
+			tf.train.AdamOptimizer(LEARNING_RATE).minimize(loss) #params[learning_rate]???
 		action_gradients = tf.gradients(self.critic_output,self.action)
 		return action_gradients, optimizer
 
@@ -87,7 +86,7 @@ class CriticNetwork:
 
 	def get_action_gradient(self, states, actions):
 		return self.sess.run(self.action_gradients, \
-			feed_dict={self.state: states, self.action: actions})
+			feed_dict={self.state: states, self.action: actions})[0]
 
 	def save(self):
 		self.saver.save(self.sess, 'saved_model/trained_model')

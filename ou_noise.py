@@ -25,7 +25,7 @@ class OUNoise:
         x = self.state
         dx = self.theta * (self.mu - x) + self.sigma * nr.randn(len(x))
         self.state = x + dx
-        return self.state
+        return np.reshape(self.state, (self.action_dimension,1))
 
 if __name__ == '__main__':
     ou = OUNoise(3)

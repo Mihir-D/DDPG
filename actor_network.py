@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-BUFFER_SIZE = 10
-BATCH_SIZE = 3
+BATCH_SIZE = 64
+BUFFER_SIZE = 50000
 GAMMA = 0.99
 LEARNING_RATE = 1e-3
 TAU = 1e-3
@@ -30,9 +30,9 @@ class ActorNetwork:
 		# conv1 = tf.layers.conv2d(self.input_state, 32, 8, 4, padding='same', activation=tf.nn.relu)
 		# conv2 = tf.layers.conv2d(conv1, 64, 4, 2, padding='same', activation=tf.nn.relu)
 		# flattened = tf.layers.flatten(conv2)
-		actor_nw = tf.layers.dense(self.input_state, 256, activation=tf.nn.relu)
-		actor_nw = tf.layers.dense(actor_nw, 128, activation=tf.nn.relu, )
-		actor_output = tf.layers.dense(actor_nw, self.n_actions, activation=tf.nn.tanh)
+		input_layer = tf.layers.dense(self.input_state, 256, activation=tf.nn.relu)
+		dense_last = tf.layers.dense(input_layer, 128, activation=tf.nn.relu)
+		actor_output = tf.layers.dense(dense_last, self.n_actions, activation=tf.nn.tanh)
 		return actor_output
 
 
@@ -40,9 +40,9 @@ class ActorNetwork:
 		# conv1 = tf.layers.conv2d(self.input_state, 32, 8, 4, padding='same', activation=tf.nn.relu)
 		# conv2 = tf.layers.conv2d(conv1, 64, 4, 2, padding='same', activation=tf.nn.relu)
 		# flattened = tf.layers.flatten(conv2)
-		actor_nw = tf.layers.dense(self.state_, 256, activation=tf.nn.relu)
-		actor_nw = tf.layers.dense(actor_nw, 128, activation=tf.nn.relu, )
-		actor_target_output = tf.layers.dense(actor_nw, self.n_actions, activation=tf.nn.tanh)
+		input_layer = tf.layers.dense(self.state_, 256, activation=tf.nn.relu)
+		dense_last = tf.layers.dense(input_layer, 128, activation=tf.nn.relu, )
+		actor_target_output = tf.layers.dense(dense_last, self.n_actions, activation=tf.nn.tanh)
 		return actor_target_output
 
 	def trainNetwork(self):

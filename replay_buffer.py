@@ -10,22 +10,17 @@ class ReplayBuffer:
 		self.count = 0
 
 	def add(self, state, action, reward, state_, done):
+		experience = (state,action,reward,state_,done)
 		if self.count < self.buffer_size:
 			self.count = self.count + 1
-			self.buffer.append((state,action,reward,state_,done))
+			self.buffer.append(experience)
 		else:
 			self.buffer.popleft()
-			self.buffer.append((state,action,reward,state_,done))
+			self.buffer.append(experience)
 
 	def sampleBatch(self, batch_size):
 		batch = []
-		if self.count < batch_size:
-			return self.buffer
-		else:
-			indices = random.sample(range(0, self.count), batch_size)
-			for index in indices:
-				batch.append(self.buffer[index])
-		return batch
+		return random.sample(self.buffer, batch_size)
 
 	def clear(self):
 		self.count = 0

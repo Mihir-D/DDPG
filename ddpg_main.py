@@ -1,9 +1,12 @@
 import gym
-from ddpg_agent import *
+import tensorflow as tf
+from ddpg_agent import DDPGAgent
 from matplotlib import pyplot as plt
 import pickle
 
-ENV_NAME = 'Pendulum-v0' #'InvertedPendulum-v1'
+# ENV_NAME = 'Pendulum-v0'
+ENV_NAME = 'Hopper-v2'
+# ENV_NAME = 'InvertedPendulum-v1'
 MAX_EPISODES = 100
 MAX_ITERATIONS = 200
 
@@ -14,13 +17,12 @@ def save_rewards(rewards):
 
 # with tf.Session() as sess:
 env = gym.make(ENV_NAME)
-# env = gym.make('Pendulum-v0')
 # print(env.observation_space.shape)
 # print(env.action_space.shape)
 n_states = env.observation_space.shape[0]
 n_actions = env.action_space.shape[0]
 
-agent = DDPGAgent(n_states, n_actions)
+agent = DDPGAgent(env)
 
 rewards = []
 
@@ -29,6 +31,7 @@ for episode in range(MAX_EPISODES):
 	total_reward = 0
 	for itr in range(MAX_ITERATIONS):
 		action = agent.getNoisyAction(state)
+		# print("##### ", action, "####")
 		state_, reward, done, _ = env.step(action[0])
 		agent.observe(state,action,reward,state_,done)
 		state = state_
@@ -36,19 +39,19 @@ for episode in range(MAX_EPISODES):
 		if done:
 			break
 	rewards.append(total_reward)
-	print(episode, total_reward)
+	print("episode: ", episode, " reward: ", total_reward)
 
 	if episode >= 30 and episode%10 == 0:
 		state = env.reset()
 		t_reward = 0
 		for itr in range(MAX_ITERATIONS):
 			action = agent.getAction(state)
-			state_, reward, done, _ = env.step(action[0])
+			state_, reward, done, _ = env.step(action)
 			state = state_
-			t_reward += 1
+			t_reward += reward
 			if done:
-				print("---------- Agent Succeeded ----------")
 				break
+		print("Test episode reward:",t_reward)
 
 
 # Save Model
